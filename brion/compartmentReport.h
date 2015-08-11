@@ -38,9 +38,6 @@ namespace detail { class CompartmentReport; }
 class CompartmentReport : public boost::noncopyable
 {
 public:
-    /** Close compartment report. @version 1.0 */
-    ~CompartmentReport();
-
     /** Open given URI to a compartment report for reading and/or writing.
      *
      * @param uri URI to compartment report. The report type is deduced from
@@ -55,8 +52,6 @@ public:
     CompartmentReport( const URI& uri, const int mode,
                        const GIDSet& gids = GIDSet( ));
 
-    /** @name Read API */
-    //@{
     /** Open given source to a compartment report for reading.
      *
      * An empty GIDSet loads all data from the report.
@@ -70,6 +65,11 @@ public:
     CompartmentReport( const std::string& source,
                        const GIDSet& gids = GIDSet( ));
 
+    /** Close and destruct compartment report. @version 1.0 */
+    ~CompartmentReport();
+
+    /** @name Read API */
+    //@{
     /** Update compartment mapping wrt the given GIDs.
      *
      * An empty gids set loads all data from the report.

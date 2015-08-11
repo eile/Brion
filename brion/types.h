@@ -53,8 +53,8 @@ class Mesh;
 class Morphology;
 class SpikeReport;
 class SpikeReportPlugin;
-
 class Synapse;
+class SynapseReport;
 class SynapseSummary;
 class Target;
 
@@ -110,6 +110,12 @@ typedef boost::multi_array< float, 2 > SynapseMatrix;
 
 /** Data matrix storing GID, numEfferent, numAfferent for each neuron. */
 typedef boost::multi_array< uint32_t, 2 > SynapseSummaryMatrix;
+
+/** Offsets within a report */
+typedef std::vector< size_t > Offsets;
+
+/** Number of elements for a list of entities */
+typedef std::vector< size_t > Counts;
 
 /** A list of Spikes events per cell gid, indexed by spikes times. */
 typedef std::multimap< float, uint32_t > Spikes;
