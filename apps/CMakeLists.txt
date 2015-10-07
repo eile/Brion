@@ -15,3 +15,10 @@ set(MORPHOLOGYCONVERTER_SOURCES morphologyConverter.cpp)
 set(MORPHOLOGYCONVERTER_LINK_LIBRARIES Brion ${Boost_PROGRAM_OPTIONS_LIBRARY})
 
 common_application(morphologyConverter)
+
+set(COMPARTMENTCONVERTER_HEADERS)
+set(COMPARTMENTCONVERTER_SOURCES compartmentConverter.cpp)
+set(COMPARTMENTCONVERTER_LINK_LIBRARIES Brion ${Boost_PROGRAM_OPTIONS_LIBRARY}
+  BBPTestData)
+
+common_application(compartmentConverter)
