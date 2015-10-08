@@ -19,9 +19,14 @@
 
 #include <brion/brion.h>
 #include <lunchbox/clock.h>
+#include <lunchbox/mpi.h>
 #include <lunchbox/omp.h>
+#include <lunchbox/sleep.h>
 #ifdef BRION_USE_BBPTESTDATA
 #  include <BBP/TestDatasets.h>
+#endif
+#ifdef LUNCHBOX_USE_MPI
+#  include <mpi.h>
 #endif
 
 #include <boost/foreach.hpp>
@@ -68,6 +73,8 @@ template< class T > void requireEqualCollections( const T& a, const T& b )
  */
 int main( const int argc, char** argv )
 {
+    lunchbox::MPI mpi( argc, argv );
+
     po::options_description options( "Options" );
 
     options.add_options()
@@ -139,6 +146,7 @@ int main( const int argc, char** argv )
 
     lunchbox::URI inURI( input );
     lunchbox::Clock clock;
+    lunchbox::Clock totalClock;
     brion::CompartmentReport in( inURI, brion::MODE_READ );
     float loadTime = clock.getTimef();
 
@@ -161,6 +169,8 @@ int main( const int argc, char** argv )
     end = std::min( end, maxEnd );
     const brion::CompartmentCounts& counts = in.getCompartmentCounts();
     const brion::GIDSet& gids = in.getGIDs();
+    const int rank = mpi.getRank();
+    const int nRanks = mpi.getSize();
 
     const lunchbox::URI outURI( vm.count( "output" ) == 1 ?
                                 vm[ "output" ].as< std::string >() :
@@ -168,22 +178,34 @@ int main( const int argc, char** argv )
 
     clock.reset();
     brion::CompartmentReport to( outURI, brion::MODE_OVERWRITE );
-    to.writeHeader( start, end, step, in.getDataUnit(), in.getTimeUnit( ));
+    if( rank == 0 )
+        to.writeHeader( start, end, step, in.getDataUnit(), in.getTimeUnit( ));
 
     {
+        const float range = float( gids.size( )) / float( nRanks );
+        const size_t startGID = rank * range;
+        const size_t endGID = ( rank + 1 ) * range;
         size_t index = 0;
+
         BOOST_FOREACH( const uint32_t gid, gids )
+        {
+            if( index < startGID )
+                continue;
+            if( index >= endGID )
+                break;
             to.writeCompartments( gid, counts[ index++ ] );
+        }
     }
 
     to.flush(); // write header before parallel section
     float writeTime = clock.getTimef();
 
     const size_t nFrames = (end - start) / step;
-    boost::progress_display progress( nFrames / lunchbox::OMP::getNThreads( ));
+    boost::progress_display progress( nFrames / nRanks /
+                                      lunchbox::OMP::getNThreads( ));
 
 #pragma omp parallel for private(clock)
-    for( size_t i = 0; i < nFrames; ++i )
+    for( size_t i = rank; i < nFrames; i += nRanks )
     {
         const float t = start + i * step;
         clock.reset();
@@ -208,18 +230,27 @@ int main( const int argc, char** argv )
             ++index;
         }
         writeTime += clock.getTimef();
-        if( lunchbox::OMP::getThreadNum() == 0 )
+        if( lunchbox::OMP::getThreadNum() == 0 && rank == 0 )
             ++progress;
     }
 
     clock.reset();
     to.flush();
-    writeTime += clock.getTimef();
+    writeTime += clock.resetTimef();
+#ifdef LUNCHBOX_USE_MPI // Measure overall conversion time correctly
+    MPI_Barrier( MPI_COMM_WORLD );
+#endif
+    const float idleTime = clock.getTimef();
+    const float totalTime = totalClock.getTimef();
 
-    std::cout << "Converted " << inURI << " to " << outURI
-              << " (in " << size_t( loadTime ) << " out " << size_t( writeTime )
-              << " ms) using " << lunchbox::OMP::getNThreads() << " threads"
-              << std::endl;
+    lunchbox::sleep( rank ); // deinterlace print
+    std::cout << "Converted " << inURI << " -> " << outURI << " in "
+              << int( totalTime ) << "ms (r " << int( loadTime ) << " w "
+              << int( writeTime ) << " i " << int( idleTime ) << ") using "
+#ifdef LUNCHBOX_USE_MPI
+              << nRanks << " processes, "
+#endif
+              << lunchbox::OMP::getNThreads() << " threads/proc" << std::endl;
 
     if( vm.count( "compare" ))
     {

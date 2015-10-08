@@ -28,6 +28,9 @@ common_package(Boost REQUIRED COMPONENTS date_time filesystem program_options
 common_package(HDF5 REQUIRED COMPONENTS C CXX)
 common_package(Lunchbox REQUIRED)
 common_package(OpenMP)
+if(LUNCHBOX_USE_MPI)
+  common_package(MPI)
+endif()
 common_package(vmmlib REQUIRED)
 common_package_post()
 
