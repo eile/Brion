@@ -59,6 +59,7 @@ public:
     void writeHeader( const float startTime, const float endTime,
                       const float timestep, const std::string& dunit,
                       const std::string& tunit ) final;
+    void addGID( const uint32_t gid ) final;
     bool writeCompartments( const uint32_t gid, const uint16_ts& counts ) final;
     bool writeFrame( const uint32_t gid, const floats& voltages,
                      const float timestamp ) final;

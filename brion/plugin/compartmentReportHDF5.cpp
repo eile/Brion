@@ -444,11 +444,6 @@ bool CompartmentReportHDF5::writeCompartments( const uint32_t gid,
         LBASSERT( sections > 0 );
         dataset.openAttribute( 1 ).write( H5::PredType::NATIVE_INT, &sections );
 
-//        dataset.openAttribute( 2 ).write( H5::PredType::NATIVE_INT, &somas );
-//        dataset.openAttribute( 3 ).write( H5::PredType::NATIVE_INT, &axons );
-//        dataset.openAttribute( 4 ).write( H5::PredType::NATIVE_INT, &basals );
-//        dataset.openAttribute( 5 ).write( H5::PredType::NATIVE_INT, &apics );
-
         boost::scoped_array< float > mapping( new float[compCount] );
         size_t i = 0;
         for( size_t j = 0; j < counts.size(); ++j )

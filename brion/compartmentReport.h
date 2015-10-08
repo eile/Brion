@@ -193,6 +193,8 @@ public:
                                 const float timestep, const std::string& dunit,
                                 const std::string& tunit );
 
+    BRION_API void addGID( const uint32_t gid );
+
     /** Write the compartment counts for each section for one cell.
      *
      * This should only be called after writeHeader().

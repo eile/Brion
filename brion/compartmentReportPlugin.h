@@ -153,6 +153,9 @@ public:
                                         const std::string& dunit,
                                         const std::string& tunit ) = 0;
 
+    /** @copydoc brion::CompartmentReport::addGID */
+    virtual void addGID( uint32_t ){};
+
     /** @copydoc brion::CompartmentReport::writeCompartments */
     virtual bool writeCompartments( uint32_t gid,
                                               const uint16_ts& counts ) = 0;

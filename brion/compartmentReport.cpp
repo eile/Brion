@@ -167,6 +167,11 @@ void CompartmentReport::writeHeader( const float startTime, const float endTime,
     _impl->plugin->writeHeader( startTime, endTime, timestep, dunit, tunit );
 }
 
+void CompartmentReport::addGID( const uint32_t gid )
+{
+    _impl->plugin->addGID( gid );
+}
+
 bool CompartmentReport::writeCompartments( const uint32_t gid,
                                            const uint16_ts& counts )
 {

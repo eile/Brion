@@ -157,6 +157,12 @@ void CompartmentReportMap::writeHeader( const float startTime,
     _tunit = tunit;
 }
 
+void CompartmentReportMap::addGID( const uint32_t gid )
+{
+    LBASSERTINFO( !counts.empty(), gid );
+    _gids.insert( gid );
+}
+
 bool CompartmentReportMap::writeCompartments( const uint32_t gid,
                                               const uint16_ts& counts )
 {
