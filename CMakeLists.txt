@@ -17,7 +17,8 @@ set(VERSION_PATCH "0")
 set(VERSION_ABI 5)
 
 set(BRION_DESCRIPTION "The Blue Brain C++ I/O library")
-set(BRION_ISSUES_URL "https://github.com/BlueBrain/Brion/issues")
+set(BRION_MAINTAINER "Daniel Nachbaur <daniel.nachbaur@epfl.ch>")
+set(BRION_LICENSE "LGPL")
 set(COMMON_PROJECT_DOMAIN ch.epfl.bluebrain)
 
 include(Common)
