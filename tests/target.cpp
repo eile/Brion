@@ -52,7 +52,6 @@ BOOST_AUTO_TEST_CASE( get )
     path /= "local/circuits/18.10.10_600cell/ncsFunctionalCompare/start.target";
 
     const brion::Target target( path.string( ));
-    std::cout << target << std::endl;
 
     const brion::Strings& targets = target.getTargetNames( brion::TARGET_CELL );
     BOOST_CHECK_EQUAL( targets.size(), 46 );
@@ -78,4 +77,32 @@ BOOST_AUTO_TEST_CASE( parse )
     const brion::GIDSet& column = brion::Target::parse(
         brion::Targets( 1, target ), "Column" );
     BOOST_CHECK_EQUAL( column.size(), 600 );
+}
+
+BOOST_AUTO_TEST_CASE( parseBroken )
+{
+    boost::filesystem::path pathUser( BBP_TEST_USER_TARGET );
+    boost::filesystem::path pathStart( BBP_TEST_START_TARGET );
+
+    const brion::Target startTarget( pathUser.string( ));
+    const brion::Target userTarget( pathStart.string( ));
+
+    brion::Targets testTargets;
+    testTargets.push_back( startTarget );
+    testTargets.push_back( userTarget );
+
+    const brion::GIDSet& column = brion::Target::parse(
+        testTargets, "Column" );
+
+    BOOST_CHECK_NO_THROW( brion::Target::parse(
+                          testTargets, "Column" ));
+    BOOST_CHECK_NO_THROW( brion::Target::parse(
+                          testTargets, "ColumnEmpty" ));
+    BOOST_CHECK_NO_THROW( brion::Target::parse(
+                          testTargets, "MyEmptyTarget" ));
+    BOOST_CHECK_THROW( brion::Target::parse(
+                       testTargets, "BrokenColumn" ),
+                       std::runtime_error );
+
+    BOOST_CHECK_EQUAL( column.size(), 1000 );
 }

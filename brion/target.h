@@ -63,6 +63,9 @@ public:
      */
     BRION_API const Strings& getTargetNames( const TargetType type ) const;
 
+    /** @return true of the target exists. */
+    BRION_API bool contains( const std::string& name ) const;
+
     /** Get targets and/or GIDSet grouped by the given target
      *
      * @param name target name to get the values from
