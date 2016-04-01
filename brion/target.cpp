@@ -74,8 +74,14 @@ public:
             const TargetType type = lexical_cast< TargetType >( typeStr );
             _targetNames[type].push_back( name );
             boost::trim( content );
-            boost::split( _targetValues[name], content, boost::is_any_of("\n "),
-                          boost::token_compress_on );
+            if( content.empty( ))
+                _targetValues[name] = Strings();
+            else
+            {
+                boost::split( _targetValues[name], content,
+                              boost::is_any_of("\n "),
+                              boost::token_compress_on );
+            }
         }
 
         if( _targetNames.empty( ))
@@ -96,7 +102,7 @@ public:
         ValueTable::const_iterator i = _targetValues.find( name );
         if( i != _targetValues.end( ))
             return i->second;
-        LBTHROW( std::runtime_error( name + " not a valid target" ));
+        throw( std::runtime_error( name + " not a valid target" ));
     }
 
 private:
@@ -149,26 +155,54 @@ void _parse( const Targets& targets,
              GIDSet& gids,
              bool& found )
 {
+    if( name.empty( ))
+        LBTHROW( std::runtime_error( "name is empty" ));
+
+    bool nameFound = false;
     BOOST_FOREACH( const Target& target, targets )
     {
         try
         {
             const brion::Strings& values = target.get( name );
-            found = true;
+            nameFound = true;
+
             BOOST_FOREACH( const std::string& value, values )
             {
                 try
                 {
+                    if( value[0] != 'a' )
+                        throw 1;
+
                     gids.insert( lexical_cast< uint32_t >( value.substr( 1 )));
                 }
                 catch( ... )
                 {
                     if( value != name )
-                        _parse( targets, value, gids, found );
+                    {
+                        try
+                        {
+                            _parse( targets, value, gids, found );
+                        }
+                        catch( ... )
+                        {
+                            found = false;
+                            return;
+                        }
+                    }
                 }
             }
         }
-        catch( ... ) {}
+        catch( ... )
+        {
+            if(( &target == &targets.back( )) && !nameFound )
+            {
+                found = false;
+                LBTHROW( std::runtime_error( name + " not a valid target" ))
+            }
+            continue;
+        }
+        found = true;
+        return;
     }
 }
 }
