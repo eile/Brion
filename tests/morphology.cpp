@@ -347,8 +347,8 @@ void checkCloseArrays( const std::vector< T >& array1,
 }
 
 template< typename T, long unsigned int M >
-void checkCloseArrays( const std::vector< vmml::vector< M, T > >& array1,
-                       const std::vector< vmml::vector< M, T > >& array2 )
+void checkCloseArrays( const std::vector< vmml::Vector< M, T > >& array1,
+                       const std::vector< vmml::Vector< M, T > >& array2 )
 {
     BOOST_CHECK_EQUAL( array1.size(), array2.size() );
     for( size_t i = 0; i != std::min( array1.size(), array2.size( )); ++i )
@@ -640,7 +640,7 @@ BOOST_AUTO_TEST_CASE( get_section_samples )
     {
         float i2 = i * i;
         points.push_back(
-            brion::Vector4f(0, -i2 / 20.0, i2 / 20.0, 0.5 + i2 /1000.0));
+            brion::Vector4f( 0., -i2 / 20.0, i2 / 20.0, 0.5 + i2 / 1000.0 ));
     }
     checkCloseArrays( morphology.getSection( 1 ).getSamples(), points );
 
@@ -649,7 +649,7 @@ BOOST_AUTO_TEST_CASE( get_section_samples )
     {
         float i2 = i * i;
         points.push_back(
-            brion::Vector4f(i2 / 20.0, 0, i2 / 20.0, 0.5 + i2 /1000.0));
+            brion::Vector4f( i2 / 20.0, 0., i2 / 20.0, 0.5 + i2 / 1000.0 ));
     }
     checkCloseArrays( morphology.getSection( 4 ).getSamples(), points );
 
@@ -658,7 +658,7 @@ BOOST_AUTO_TEST_CASE( get_section_samples )
     {
         float i2 = i * i;
         points.push_back(
-            brion::Vector4f(-i2 / 20.0, 0, i2 / 20.0, 0.5 + i2 /1000.0));
+            brion::Vector4f( -i2 / 20.0, 0., i2 / 20.0, 0.5 + i2 / 1000.0 ));
     }
     checkCloseArrays( morphology.getSection( 7 ).getSamples(), points );
 
@@ -667,7 +667,7 @@ BOOST_AUTO_TEST_CASE( get_section_samples )
     {
         float i2 = i * i;
         points.push_back(
-            brion::Vector4f(0, i2 / 20.0, i2 / 20.0, 0.5 + i2 /1000.0));
+            brion::Vector4f( 0., i2 / 20.0, i2 / 20.0, 0.5 + i2 / 1000.0 ));
     }
     checkCloseArrays( morphology.getSection( 10 ).getSamples(), points );
 }
@@ -710,17 +710,17 @@ BOOST_AUTO_TEST_CASE( get_soma_geomery )
     brain::neuron::Morphology morphology( TEST_MORPHOLOGY_URI );
 
     const brain::neuron::Soma soma = morphology.getSoma();
-    checkEqualArrays( soma.getProfilePoints(), 4,
-                      V4f( .1, 0, 0, .1 ), V4f( 0, .1, 0, .1 ),
-                      V4f( -.1, 0, 0, .1 ), V4f( 0, -.1, 0, .1 ));
+    checkEqualArrays( soma.getProfilePoints(), 4.,
+                      V4f( .1, 0., 0., .1 ), V4f( 0., .1, 0., .1 ),
+                      V4f( -.1, 0., 0., .1 ), V4f( 0., -.1, 0., .1 ));
 
     BOOST_CHECK_CLOSE( soma.getMeanRadius(), 0.1, 1e-5 );
-    BOOST_CHECK_EQUAL( soma.getCentroid(), V3f::ZERO );
+    BOOST_CHECK_EQUAL( soma.getCentroid(), V3f( ));
 
     brain::Matrix4f matrix;
     matrix.setTranslation( V3f( 2, 0, 0 ));
     brain::neuron::Morphology transformed( TEST_MORPHOLOGY_URI, matrix );
-    BOOST_CHECK_MESSAGE( transformed.getSoma().getCentroid().equals(V3f( 2,0,0 )),
+    BOOST_CHECK_MESSAGE( transformed.getSoma().getCentroid().equals(V3f(2,0,0)),
                          transformed.getSoma().getCentroid( ));
 
 }
@@ -734,20 +734,22 @@ BOOST_AUTO_TEST_CASE( get_section_samples_by_positions )
         points.push_back( p );
 
     checkCloseArrays( morphology.getSection( 1 ).getSamples( points ), 6,
-        V4f( 0, 0, 0, .5 ), V4f( 0, -1, 1, .52 ), V4f( 0, -2, 2, .54 ),
-        V4f( 0, -3, 3, .56 ), V4f( 0, -4, 4, .58 ), V4f(  0, -5, 5, .6 ));
+                      V4f( 0., 0., 0., .5 ), V4f( 0., -1., 1., .52 ),
+                      V4f( 0., -2., 2., .54 ), V4f( 0., -3., 3., .56 ),
+                      V4f( 0., -4., 4., .58 ), V4f(  0., -5., 5., .6 ));
 
     checkCloseArrays( morphology.getSection( 4 ).getSamples( points ), 6,
-        V4f( 0, 0, 0, .5 ), V4f( 1, 0, 1, .52 ), V4f( 2, 0, 2, .54 ),
-        V4f( 3, 0, 3, .56 ), V4f( 4, 0, 4, .58 ), V4f(  5, 0, 5, .6 ));
+        V4f( 0., 0., 0., .5 ), V4f( 1., 0., 1., .52 ), V4f( 2., 0., 2., .54 ),
+        V4f( 3., 0., 3., .56 ), V4f( 4., 0., 4., .58 ), V4f(  5., 0., 5., .6 ));
 
     checkCloseArrays( morphology.getSection( 7 ).getSamples( points ), 6,
-        V4f( 0, 0, 0, .5 ), V4f( -1, 0, 1, .52 ), V4f( -2, 0, 2, .54 ),
-        V4f( -3, 0, 3, .56 ), V4f( -4, 0, 4, .58 ), V4f( -5, 0, 5, .6 ));
+                      V4f( 0., 0., 0., .5 ), V4f( -1., 0., 1., .52 ),
+                      V4f( -2., 0., 2., .54 ), V4f( -3., 0., 3., .56 ),
+                      V4f( -4., 0., 4., .58 ), V4f( -5., 0., 5., .6 ));
 
     checkCloseArrays( morphology.getSection( 10 ).getSamples( points ), 6,
-        V4f( 0, 0, 0, .5 ), V4f( 0, 1, 1, .52 ), V4f( 0, 2, 2, .54 ),
-        V4f( 0, 3, 3, .56 ), V4f( 0, 4, 4, .58 ), V4f(  0, 5, 5, .6 ));
+        V4f( 0., 0., 0., .5 ), V4f( 0., 1., 1., .52 ), V4f( 0., 2., 2., .54 ),
+        V4f( 0., 3., 3., .56 ), V4f( 0., 4., 4., .58 ), V4f(  0., 5., 5., .6 ));
 }
 
 BOOST_AUTO_TEST_CASE( morphology_hierarchy )
@@ -776,8 +778,8 @@ BOOST_AUTO_TEST_CASE( transform_with_matrix )
     matrix.rotate_z( M_PI * 0.5 );
     brain::neuron::Morphology rotated( TEST_MORPHOLOGY_URI, matrix );
     checkCloseArraysUptoN( rotated.getPoints(), 4,
-      V4f( .0, .1, .0, .1 ), V4f( -.1, .0, .0, .1 ),
-      V4f( .0, -.1, .0, .1 ), V4f( .1, .0, .0, .1 ));
+      V4f( 0., .1, 0., .1 ), V4f( -.1, 0., 0., .1 ),
+      V4f( 0., -.1, 0., .1 ), V4f( .1, 0., 0., .1 ));
 
     matrix = brain::Matrix4f();
     matrix.rotate_z( M_PI * 0.5 );
@@ -785,6 +787,6 @@ BOOST_AUTO_TEST_CASE( transform_with_matrix )
     brain::neuron::Morphology transformed( TEST_MORPHOLOGY_URI, matrix );
     BOOST_CHECK_EQUAL( transformed.getTransformation(), matrix );
     checkCloseArraysUptoN( transformed.getPoints(), 4,
-      V4f( 2., .1, .0, .1 ), V4f( 1.9, .0, .0, .1 ),
-      V4f( 2., -.1, .0, .1 ), V4f( 2.1, .0, .0, .1 ));
+      V4f( 2., .1, 0., .1 ), V4f( 1.9, 0., 0., .1 ),
+      V4f( 2., -.1, 0., .1 ), V4f( 2.1, 0., 0., .1 ));
 }

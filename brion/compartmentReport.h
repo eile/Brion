@@ -31,7 +31,8 @@ namespace detail { class CompartmentReport; }
 
 /** Read & write access to a CompartmentReport.
  *
- * The supported types are binary (r), HDF5 (rw) and stream (rw) reports.
+ * The supported types are binary (r), HDF5 (rw), Key-Value (rw) and stream (rw)
+ * reports.
  *
  * Following RAII, this class is ready to use after the creation and will ensure
  * release of resources upon destruction.
@@ -211,7 +212,7 @@ public:
     /** Write the voltages for one cell at a point in time.
      *
      * This should only be called after all the required mapping has been saved
-     * before.
+     * using writeCompartments().
      *
      * @param gid the GID of the cell
      * @param voltages the voltages per compartment to save

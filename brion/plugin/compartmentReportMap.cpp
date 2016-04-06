@@ -163,8 +163,33 @@ bool CompartmentReportMap::writeCompartments( const uint32_t gid,
 {
     LBASSERTINFO( !counts.empty(), gid );
     _gids.insert( gid );
+    _insertGID( gid, counts );
     return _store.insert( _getScope( _uri ) + countsKey + toString( gid ),
                           counts );
+}
+
+void CompartmentReportMap::_insertGID( const uint32_t gid,
+                                       const uint16_ts& counts )
+{
+    _cellCounts[ gid ] = counts;
+    _counts.push_back( counts );
+
+    const size_t nSections = _cellCounts[ gid ].size();
+    const uint64_t offset = _offsets.empty() ? 0 : _offsets.back().back();
+    _offsets.push_back( uint64_ts( nSections,
+                                   std::numeric_limits< uint64_t >::max( )));
+
+    for( size_t i = 0; i < nSections; ++i )
+    {
+        const uint16_t numCompartments = _cellCounts[ gid ][ i ];
+        if( numCompartments == 0 )
+            continue;
+
+        _offsets.back()[ i ] = offset + numCompartments;
+    }
+
+    _totalCompartments += std::accumulate( _cellCounts[ gid ].begin(),
+                                           _cellCounts[ gid ].end(), 0 );
 }
 
 bool CompartmentReportMap::writeFrame( const uint32_t gid,
@@ -204,7 +229,7 @@ bool CompartmentReportMap::_flushHeader()
                   "Invalid report time " << _header.startTime << ".." <<
                   _header.endTime << "/" << _header.timestep );
 
-    _header.nGIDs = uint32_t(_gids.size( ));
+    _header.nGIDs = uint32_t( _gids.size( ));
 
     const std::string& scope = _getScope( _uri );
     if( !_store.insert( scope + headerKey, _header ) ||
@@ -216,7 +241,8 @@ bool CompartmentReportMap::_flushHeader()
     }
 
     LBVERB << "Wrote meta information of " << _uri << std::endl;
-    return _loadHeader();
+    _readable = true;
+    return true;
 }
 
 bool CompartmentReportMap::_loadHeader()
@@ -258,49 +284,22 @@ bool CompartmentReportMap::_loadHeader()
         _store.fetch( scope + tunitKey );
         if( loadGIDs )
             _store.fetch( scope + gidsKey, _header.nGIDs * sizeof( uint32_t ));
-        BOOST_FOREACH( const uint32_t gid, _gids )
-            _store.fetch( scope + countsKey + toString( gid ));
 #endif
 
         _dunit = _store[ scope + dunitKey ];
         _tunit = _store[ scope + tunitKey ];
         if( loadGIDs )
             _gids = _store.getSet< uint32_t >( scope + gidsKey );
-
         _readable = true;
+
 #ifdef ASYNC_IO
-        if( loadGIDs )
-        {
-            BOOST_FOREACH( const uint32_t gid, _gids )
-                _store.fetch( scope + countsKey + toString( gid ));
-        }
+        BOOST_FOREACH( const uint32_t gid, _gids )
+            _store.fetch( scope + countsKey + toString( gid ));
 #endif
 
-        uint64_t offset = 0;
         BOOST_FOREACH( const uint32_t gid, _gids )
-        {
-            _cellCounts[ gid ] = _store.getVector< uint16_t >( scope +
-                                                               countsKey +
-                                                               toString( gid ));
-            _counts.push_back( _cellCounts[ gid ] );
-
-            const size_t nSections = _cellCounts[ gid ].size();
-            _offsets.push_back( uint64_ts( nSections,
-                                        std::numeric_limits<uint64_t>::max( )));
-
-            for( size_t i = 0; i < nSections; ++i )
-            {
-                const uint16_t numCompartments = _cellCounts[ gid ][ i ];
-                if( numCompartments == 0 )
-                    continue;
-
-                _offsets.back()[ i ] = offset;
-                offset += numCompartments;
-            }
-
-            _totalCompartments += std::accumulate( _cellCounts[ gid ].begin(),
-                                                   _cellCounts[ gid ].end(), 0);
-        }
+            _insertGID( gid, _store.getVector< uint16_t >( scope + countsKey +
+                                                           toString( gid )));
     }
     catch( const std::runtime_error& e )
     {

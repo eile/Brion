@@ -80,10 +80,8 @@ private:
     lunchbox::PersistentMap _store;
 
     Header _header;
-
     std::string _dunit;
     std::string _tunit;
-
     brion::GIDSet _gids;
 
     // index to get value from voltage buffer for all sections (ordered by
@@ -110,6 +108,7 @@ private:
     void _clear();
     bool _loadHeader();
     bool _flushHeader();
+    void _insertGID( const uint32_t gid, const uint16_ts& counts );
 };
 
 }
