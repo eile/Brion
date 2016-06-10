@@ -201,19 +201,24 @@ BOOST_AUTO_TEST_CASE( getNumSynapses )
 
 BOOST_AUTO_TEST_CASE( perf )
 {
-    boost::filesystem::path path( "/gpfs/bbp.cscs.ch/scratch/gss/bgq/kumbhar/10x10/merged_circuit/ncsFunctionalAllRecipePathways/nrn.h5" );
-    const brion::Synapse synapseFile( path.string( ));
-
     brion::GIDSet gids;
-    for( uint32_t i = 1; i <= 1000; ++i )
+    for( uint32_t i = 1; i <= 7000; ++i )
         gids.insert( i );
 
+    size_t numSynapses = 0;
     namespace bp = boost::posix_time;
     bp::ptime startTime = bp::microsec_clock::local_time();
+
+    boost::filesystem::path path( "/home/eilemann/Models/nrn.h5" );
+    const brion::Synapse synapseFile( path.string( ));
+
     for( brion::GIDSetCIter i = gids.begin(); i != gids.end(); ++i )
-        synapseFile.read( *i, brion::SYNAPSE_ALL_ATTRIBUTES );
+        numSynapses +=
+            synapseFile.read( *i, brion::SYNAPSE_ALL_ATTRIBUTES ).shape()[0];
+
     bp::time_duration duration = bp::microsec_clock::local_time() - startTime;
-    LBERROR << "Reading all attributes for " << gids.size() << " cells took: "
+    LBERROR << "Reading all attributes for " << gids.size() << " cells and "
+            << numSynapses << " synapses took: "
             << duration.total_milliseconds() << " ms." << std::endl;
 }
 
