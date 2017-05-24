@@ -19,7 +19,7 @@
 
 #include <brion/brion.h>
 
-#include <lunchbox/clock.h>
+#include <extra/Clock.h>
 #include <lunchbox/file.h>
 #include <lunchbox/string.h>
 #include <lunchbox/term.h>
@@ -176,7 +176,7 @@ int main(const int argc, char** argv)
     }
 
     lunchbox::URI inURI(input);
-    lunchbox::Clock clock;
+    extra::Clock clock;
     brion::CompartmentReport in(inURI, brion::MODE_READ);
     float loadTime = clock.getTimef();
 

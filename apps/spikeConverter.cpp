@@ -20,10 +20,9 @@
 
 #include <brion/brion.h>
 
-#include <lunchbox/clock.h>
+#include <extra/Clock.h>
 #include <lunchbox/file.h>
 #include <lunchbox/log.h>
-#include <lunchbox/sleep.h>
 #include <lunchbox/string.h>
 #include <lunchbox/term.h>
 
@@ -122,7 +121,7 @@ int main(int argc, char* argv[])
 
     try
     {
-        lunchbox::Clock clock;
+        extra::Clock clock;
 
         float readTime = 0.f;
         brion::SpikeReport in(brion::URI(input), brion::MODE_READ);

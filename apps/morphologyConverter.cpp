@@ -5,11 +5,10 @@
 
 #include <brion/brion.h>
 
-#include <lunchbox/clock.h>
+#include <extra/Clock.h>
 #include <lunchbox/file.h>
 #include <lunchbox/term.h>
 
-#include <boost/foreach.hpp>
 #include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
@@ -90,7 +89,7 @@ int main(int argc, char* argv[])
     if (vm["format"].as<std::string>() == "h5v1")
         outVersion = brion::MORPHOLOGY_VERSION_H5_1;
 
-    lunchbox::Clock clock;
+    extra::Clock clock;
     const brion::Morphology in(input);
 
     float readTime = clock.resetTimef();
@@ -106,7 +105,7 @@ int main(int argc, char* argv[])
         stages.resize(1); // does not have stages and ignores the arg
     }
 
-    BOOST_FOREACH (const brion::MorphologyRepairStage stage, stages)
+    for (const auto stage : stages)
     {
         writeTime += clock.resetTimef();
         brion::Vector4fsPtr points = in.readPoints(stage);
